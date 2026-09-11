@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Şifre Üretici</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #0f172a;
+            color: #f8fafc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background-color: #1e293b;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        h2 {
+            margin-bottom: 1.5rem;
+            text-align: center;
+            color: #38bdf8;
+        }
+
+        .result-container {
+            background-color: #0f172a;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            border-radius: 6px;
+            margin-bottom: 1.5rem;
+            border: 1px solid #334155;
+        }
+
+        #password {
+            font-size: 1.2rem;
+            font-family: monospace;
+            word-break: break-all;
+        }
+
+        .btn-copy {
+            background-color: #38bdf8;
+            color: #0f172a;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+        .btn-copy:hover {
+            background-color: #0ea5e9;
+        }
+
+        .setting {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        input[type="number"] {
+            background-color: #0f172a;
+            color: #fff;
+            border: 1px solid #334155;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            width: 60px;
+            text-align: center;
+        }
+
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .btn-generate {
+            display: block;
+            width: 100%;
+            background-color: #10b981;
+            color: white;
+            border: none;
+            padding: 0.75rem;
+            font-size: 1.1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 1.5rem;
+            transition: background 0.2s;
+        }
+
+        .btn-generate:hover {
+            background-color: #059669;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Şifre Üretici</h2>
+        
+        <div class="result-container">
+            <span id="password">Şifre Oluşturun...</span>
+            <button class="btn-copy" id="copy">Kopyala</button>
+        </div>
+
+        <div class="settings">
+            <div class="setting">
+                <label>Şifre Uzunluğu</label>
+                <input type="number" id="length" min="4" max="32" value="12">
+            </div>
+            <div class="setting">
+                <label>Büyük Harf Ekle (A-Z)</label>
+                <input type="checkbox" id="uppercase" checked>
+            </div>
+            <div class="setting">
+                <label>Küçük Harf Ekle (a-z)</label>
+                <input type="checkbox" id="lowercase" checked>
+            </div>
+            <div class="setting">
+                <label>Rakam Ekle (0-9)</label>
+                <input type="checkbox" id="numbers" checked>
+            </div>
+            <div class="setting">
+                <label>Sembol Ekle (!@#$%^&*)</label>
+                <input type="checkbox" id="symbols" checked>
+            </div>
+        </div>
+
+        <button class="btn-generate" id="generate">Şifre Oluştur</button>
+    </div>
+
+    <script>
+        const passwordEl = document.getElementById('password');
+        const lengthEl = document.getElementById('length');
+        const uppercaseEl = document.getElementById('uppercase');
+        const lowercaseEl = document.getElementById('lowercase');
+        const numbersEl = document.getElementById('numbers');
+        const symbolsEl = document.getElementById('symbols');
+        const generateEl = document.getElementById('generate');
+        const copyEl = document.getElementById('copy');
+
+        const randomFunc = {
+            lower: () => String.fromCharCode(Math.floor(Math.random() * 26) + 97),
+            upper: () => String.fromCharCode(Math.floor(Math.random() * 26) + 65),
+            number: () => String.fromCharCode(Math.floor(Math.random() * 10) + 48),
+            symbol: () => {
+                const symbols = '!@#$%^&*(){}[]=<>/,.';
+                return symbols[Math.floor(Math.random() * symbols.length)];
+            }
+        };
+
+        generateEl.addEventListener('click', () => {
+            const length = +lengthEl.value;
+            const hasLower = lowercaseEl.checked;
+            const hasUpper = uppercaseEl.checked;
+            const hasNumber = numbersEl.checked;
+            const hasSymbol = symbolsEl.checked;
+
+            passwordEl.innerText = generatePassword(hasLower, hasUpper, hasNumber, hasSymbol, length);
+        });
+
+        function generatePassword(lower, upper, number, symbol, length) {
+            let generatedPassword = '';
+            const typesCount = lower + upper + number + symbol;
+            const typesArr = [{ lower }, { upper }, { number }, { symbol }].filter(item => Object.values(item)[0]);
+
+            if (typesCount === 0) {
+                return 'Lütfen en az bir seçenek seçin!';
+            }
+
+            for (let i = 0; i < length; i += typesCount) {
+                typesArr.forEach(type => {
+                    const funcName = Object.keys(type)[0];
+                    generatedPassword += randomFunc[funcName]();
+                });
+            }
+
+            return generatedPassword.slice(0, length);
+        }
+
+        copyEl.addEventListener('click', () => {
+            const password = passwordEl.innerText;
+            if (password === 'Şifre Oluşturun...' || password === 'Lütfen en az bir seçenek seçin!') {
+                return;
+            }
+            navigator.clipboard.writeText(password);
+            alert('Şifre panoya kopyalandı!');
+        });
+    </script>
+</body>
+</html>
